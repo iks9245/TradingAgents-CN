@@ -741,7 +741,7 @@ class GoogleToolCallHandler:
 2. 包含具体的数值和专业分析
 3. 提供明确的投资建议和风险提示
 4. 报告长度不少于800字
-5. 使用中文撰写
+5. 使用繁體中文撰寫
 6. 确保在分析中正确使用公司名称"{company_name}"和股票代码"{ticker}"
 
 {specific_requirements}

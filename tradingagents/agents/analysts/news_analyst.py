@@ -144,7 +144,7 @@ def create_news_analyst(llm, toolkit):
 💰 必须包含基于新闻的市场反应预期和投资建议
 🎯 聚焦新闻内容本身的解读，不涉及技术指标分析
 
-请撰写详细的中文分析报告，并在报告末尾附上Markdown表格总结关键发现。"""
+請撰寫詳細的繁體中文分析報告，並在報告末尾附上Markdown表格總結關鍵發現。"""
         )
 
         prompt = ChatPromptTemplate.from_messages(
@@ -175,8 +175,8 @@ def create_news_analyst(llm, toolkit):
                     "\n"
                     "\n您可以访问以下工具：{tool_names}。"
                     "\n{system_message}"
-                    "\n供您参考，当前日期是{current_date}。我们正在查看公司{ticker}。"
-                    "\n请按照上述要求执行，用中文撰写所有分析内容。",
+                    "\n供您參考，當前日期是{current_date}。我們正在查看公司{ticker}。"
+                    "\n請按照上述要求執行，用繁體中文撰寫所有分析內容。",
                 ),
                 MessagesPlaceholder(variable_name="messages"),
             ]
@@ -229,7 +229,7 @@ def create_news_analyst(llm, toolkit):
 === 分析要求 ===
 {system_message}
 
-请基于上述真实新闻数据撰写详细的中文分析报告。注意：新闻数据已经提供，您无需再调用任何工具。
+請基於上述真實新聞數據撰寫詳細的繁體中文分析報告。注意：新聞數據已經提供，您無需再調用任何工具。
 """
 
                     logger.info(f"[新闻分析师] 🔄 使用预获取新闻数据直接生成分析...")
@@ -342,7 +342,7 @@ def create_news_analyst(llm, toolkit):
 === 分析要求 ===
 {system_message}
 
-请基于上述真实新闻数据撰写详细的中文分析报告。
+請基於上述真實新聞數據撰寫詳細的繁體中文分析報告。
 """
 
                         logger.info(f"[新闻分析师] 🔄 基于强制获取的新闻数据重新生成完整分析...")

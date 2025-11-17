@@ -151,7 +151,7 @@ def create_social_media_analyst(llm, toolkit):
 - 预期价格波动幅度
 - 基于情绪的交易时机建议
 
-请撰写详细的中文分析报告，并在报告末尾附上Markdown表格总结关键发现。
+請撰寫詳細的繁體中文分析報告，並在報告末尾附上Markdown表格總結關鍵發現。
 注意：由于中国社交媒体API限制，如果数据获取受限，请明确说明并提供替代分析建议。"""
         )
 
@@ -166,7 +166,7 @@ def create_social_media_analyst(llm, toolkit):
                     " 如果您或任何其他助手有最终交易提案：**买入/持有/卖出**或可交付成果，"
                     " 请在您的回应前加上最终交易提案：**买入/持有/卖出**，以便团队知道停止。"
                     " 您可以访问以下工具：{tool_names}。\n{system_message}"
-                    "供您参考，当前日期是{current_date}。我们要分析的当前公司是{ticker}。请用中文撰写所有分析内容。",
+                    "供您參考，當前日期是{current_date}。我們要分析的當前公司是{ticker}。請用繁體中文撰寫所有分析內容。",
                 ),
                 MessagesPlaceholder(variable_name="messages"),
             ]
