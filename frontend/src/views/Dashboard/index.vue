@@ -1,14 +1,14 @@
 <template>
   <div class="dashboard">
-    <!-- 欢迎区域 -->
+    <!-- 歡迎區域 -->
     <div class="welcome-section">
       <div class="welcome-content">
         <h1 class="welcome-title">
-          欢迎使用 TradingAgents-CN
+          歡迎使用 TradingAgents-CN
           <span class="version-badge">v1.0.0-preview</span>
         </h1>
         <p class="welcome-subtitle">
-          现代化的多智能体股票分析学习平台，辅助你掌握更全面的市场视角分析股票
+          現代化的多智能體股票分析學習平台，協助你以更完整的市場視角來研究股票
         </p>
       </div>
       <div class="welcome-actions">
@@ -18,34 +18,34 @@
         </el-button>
         <el-button size="large" @click="goToScreening">
           <el-icon><Search /></el-icon>
-          股票筛选
+          股票篩選
         </el-button>
       </div>
     </div>
 
 
-    <!-- 学习中心推荐卡片 -->
+    <!-- 學習中心推薦卡片 -->
     <el-card class="learning-highlight-card">
       <div class="learning-highlight">
         <div class="learning-icon">
           <el-icon size="48"><Reading /></el-icon>
         </div>
         <div class="learning-content">
-          <h2>📚 AI股票分析学习中心</h2>
-          <p>从零开始学习AI、大语言模型和智能股票分析。了解多智能体系统如何协作分析股票，掌握提示词工程技巧，选择合适的大模型，理解AI的能力与局限性。</p>
+          <h2>📚 AI 股票分析學習中心</h2>
+          <p>從零開始學習 AI、大語言模型與智能股票分析。了解多智能體如何協作研究股票，掌握提示詞工程技巧，挑選合適的大模型，並理解 AI 的能力與限制。</p>
           <div class="learning-features">
-            <span class="feature-tag">🤖 AI基础知识</span>
-            <span class="feature-tag">✍️ 提示词工程</span>
-            <span class="feature-tag">🎯 模型选择</span>
+            <span class="feature-tag">🤖 AI 基礎知識</span>
+            <span class="feature-tag">✍️ 提示詞工程</span>
+            <span class="feature-tag">🎯 模型選擇</span>
             <span class="feature-tag">📊 分析原理</span>
-            <span class="feature-tag">⚠️ 风险认知</span>
-            <span class="feature-tag">🎓 实战教程</span>
+            <span class="feature-tag">⚠️ 風險認知</span>
+            <span class="feature-tag">🎓 實戰教程</span>
           </div>
         </div>
         <div class="learning-action">
           <el-button type="primary" size="large" @click="goToLearning">
             <el-icon><Reading /></el-icon>
-            开始学习
+            立即開始學習
           </el-button>
         </div>
       </div>
@@ -53,7 +53,7 @@
 
     <!-- 主要功能区域 -->
     <el-row :gutter="24" class="main-content">
-      <!-- 左侧：快速操作 -->
+      <!-- 左側：快速操作 -->
       <el-col :span="16">
         <el-card class="quick-actions-card" header="快速操作">
           <div class="quick-actions">
@@ -62,8 +62,8 @@
                 <el-icon><Document /></el-icon>
               </div>
               <div class="action-content">
-                <h3>单股分析</h3>
-                <p>深度分析单只股票的投资价值</p>
+                <h3>單股分析</h3>
+                <p>深度解析單一股票的投資價值</p>
               </div>
               <el-icon class="action-arrow"><ArrowRight /></el-icon>
             </div>
@@ -74,7 +74,7 @@
               </div>
               <div class="action-content">
                 <h3>批量分析</h3>
-                <p>同时分析多只股票，提高效率</p>
+                <p>同步分析多檔股票，提升效率</p>
               </div>
               <el-icon class="action-arrow"><ArrowRight /></el-icon>
             </div>
@@ -84,8 +84,8 @@
                 <el-icon><Search /></el-icon>
               </div>
               <div class="action-content">
-                <h3>股票筛选</h3>
-                <p>通过多维度条件筛选优质股票</p>
+                <h3>股票篩選</h3>
+                <p>依多重條件篩出優質股票</p>
               </div>
               <el-icon class="action-arrow"><ArrowRight /></el-icon>
             </div>
@@ -95,8 +95,8 @@
                 <el-icon><List /></el-icon>
               </div>
               <div class="action-content">
-                <h3>任务中心</h3>
-                <p>查看和管理分析任务列表</p>
+                <h3>任務中心</h3>
+                <p>檢視並管理分析任務列表</p>
               </div>
               <el-icon class="action-arrow"><ArrowRight /></el-icon>
             </div>
@@ -106,16 +106,16 @@
         <!-- 最近分析 -->
         <el-card class="recent-analyses-card" header="最近分析" style="margin-top: 24px;">
           <el-table :data="recentAnalyses" style="width: 100%">
-            <el-table-column prop="stock_code" label="股票代码" width="120" />
-            <el-table-column prop="stock_name" label="股票名称" width="150" />
-            <el-table-column prop="status" label="状态" width="100">
+            <el-table-column prop="stock_code" label="股票代碼" width="120" />
+            <el-table-column prop="stock_name" label="股票名稱" width="150" />
+            <el-table-column prop="status" label="狀態" width="100">
               <template #default="{ row }">
                 <el-tag :type="getStatusType(row.status)">
                   {{ getStatusText(row.status) }}
                 </el-tag>
               </template>
             </el-table-column>
-            <el-table-column prop="start_time" label="创建时间" width="180">
+            <el-table-column prop="start_time" label="建立時間" width="180">
               <template #default="{ row }">
                 {{ formatTime(row.start_time) }}
               </template>
@@ -125,21 +125,21 @@
                 <el-button type="text" size="small" @click="viewAnalysis(row)">
                   查看
                 </el-button>
-                <el-button
-                  v-if="row.status === 'completed'"
-                  type="text"
-                  size="small"
-                  @click="downloadReport(row)"
-                >
-                  下载
-                </el-button>
+              <el-button
+                v-if="row.status === 'completed'"
+                type="text"
+                size="small"
+                @click="downloadReport(row)"
+              >
+                下載
+              </el-button>
               </template>
             </el-table-column>
           </el-table>
 
           <div class="table-footer">
             <el-button type="text" @click="goToHistory">
-              查看全部历史 <el-icon><ArrowRight /></el-icon>
+              查看全部歷史 <el-icon><ArrowRight /></el-icon>
             </el-button>
           </div>
         </el-card>
@@ -147,7 +147,7 @@
         <!-- 市场快讯 -->
         <el-card class="market-news-card" style="margin-top: 24px;">
           <template #header>
-            <span>市场快讯</span>
+            <span>市場快訊</span>
           </template>
           <div v-if="marketNews.length > 0" class="news-list">
             <div
@@ -162,18 +162,18 @@
           </div>
           <div v-else class="empty-state">
             <el-icon class="empty-icon"><InfoFilled /></el-icon>
-            <p>暂无市场快讯</p>
+            <p>目前沒有市場快訊</p>
           </div>
         </el-card>
       </el-col>
 
-      <!-- 右侧：自选股和快讯 -->
+      <!-- 右側：自選股和快訊 -->
       <el-col :span="8">
-        <!-- 我的自选股 -->
+        <!-- 我的自選股 -->
         <el-card class="favorites-card">
           <template #header>
             <div class="card-header">
-              <span>我的自选股</span>
+              <span>我的自選股</span>
               <el-button type="text" size="small" @click="goToFavorites">
                 查看全部 <el-icon><ArrowRight /></el-icon>
               </el-button>
@@ -181,9 +181,9 @@
           </template>
 
           <div v-if="favoriteStocks.length === 0" class="empty-favorites">
-            <el-empty description="暂无自选股" :image-size="60">
+            <el-empty description="尚無自選股" :image-size="60">
               <el-button type="primary" size="small" @click="goToFavorites">
-                添加自选股
+                新增自選股
               </el-button>
             </el-empty>
           </div>
@@ -213,18 +213,18 @@
 
           <div v-if="favoriteStocks.length > 5" class="favorites-footer">
             <el-button type="text" size="small" @click="goToFavorites">
-              查看全部 {{ favoriteStocks.length }} 只自选股
+              查看全部 {{ favoriteStocks.length }} 檔自選股
             </el-button>
           </div>
         </el-card>
 
-        <!-- 模拟交易账户 -->
+        <!-- 模擬交易帳戶 -->
         <el-card class="paper-trading-card" style="margin-top: 24px;">
           <template #header>
             <div class="card-header">
-              <span>模拟交易账户</span>
+              <span>模擬交易帳戶</span>
               <el-button type="text" size="small" @click="goToPaperTrading">
-                查看详情 <el-icon><ArrowRight /></el-icon>
+                查看詳情 <el-icon><ArrowRight /></el-icon>
               </el-button>
             </div>
           </template>
@@ -232,51 +232,51 @@
           <div v-if="paperAccount" class="paper-account-info">
             <!-- A股账户 -->
             <div class="account-section">
-              <div class="account-section-title">🇨🇳 A股账户</div>
+              <div class="account-section-title">🇨🇳 A股帳戶</div>
               <div class="account-item">
-                <div class="account-label">现金</div>
+                <div class="account-label">現金</div>
                 <div class="account-value">¥{{ formatMoney(paperAccount.cash?.CNY || paperAccount.cash) }}</div>
               </div>
               <div class="account-item">
-                <div class="account-label">持仓市值</div>
+                <div class="account-label">持倉市值</div>
                 <div class="account-value">¥{{ formatMoney(paperAccount.positions_value?.CNY || paperAccount.positions_value) }}</div>
               </div>
               <div class="account-item">
-                <div class="account-label">总资产</div>
+                <div class="account-label">總資產</div>
                 <div class="account-value primary">¥{{ formatMoney(paperAccount.equity?.CNY || paperAccount.equity) }}</div>
               </div>
             </div>
 
             <!-- 港股账户 -->
             <div class="account-section" v-if="paperAccount.cash?.HKD !== undefined">
-              <div class="account-section-title">🇭🇰 港股账户</div>
+              <div class="account-section-title">🇭🇰 港股帳戶</div>
               <div class="account-item">
-                <div class="account-label">现金</div>
+                <div class="account-label">現金</div>
                 <div class="account-value">HK${{ formatMoney(paperAccount.cash.HKD) }}</div>
               </div>
               <div class="account-item">
-                <div class="account-label">持仓市值</div>
+                <div class="account-label">持倉市值</div>
                 <div class="account-value">HK${{ formatMoney(paperAccount.positions_value?.HKD || 0) }}</div>
               </div>
               <div class="account-item">
-                <div class="account-label">总资产</div>
+                <div class="account-label">總資產</div>
                 <div class="account-value primary">HK${{ formatMoney(paperAccount.equity?.HKD || 0) }}</div>
               </div>
             </div>
 
             <!-- 美股账户 -->
             <div class="account-section" v-if="paperAccount.cash?.USD !== undefined">
-              <div class="account-section-title">🇺🇸 美股账户</div>
+              <div class="account-section-title">🇺🇸 美股帳戶</div>
               <div class="account-item">
-                <div class="account-label">现金</div>
+                <div class="account-label">現金</div>
                 <div class="account-value">${{ formatMoney(paperAccount.cash.USD) }}</div>
               </div>
               <div class="account-item">
-                <div class="account-label">持仓市值</div>
+                <div class="account-label">持倉市值</div>
                 <div class="account-value">${{ formatMoney(paperAccount.positions_value?.USD || 0) }}</div>
               </div>
               <div class="account-item">
-                <div class="account-label">总资产</div>
+                <div class="account-label">總資產</div>
                 <div class="account-value primary">${{ formatMoney(paperAccount.equity?.USD || 0) }}</div>
               </div>
             </div>
@@ -284,9 +284,9 @@
 
           <div v-else class="empty-state">
             <el-icon class="empty-icon"><InfoFilled /></el-icon>
-            <p>暂无账户信息</p>
+            <p>尚無帳戶資訊</p>
             <el-button type="primary" size="small" @click="goToPaperTrading">
-              查看模拟交易
+              前往查看模擬交易
             </el-button>
           </div>
         </el-card>
@@ -407,9 +407,9 @@ const downloadReport = async (analysis: AnalysisTask) => {
       }
     })
     if (!res.ok) {
-      const msg = `下载失败：HTTP ${res.status}`
+      const msg = `下載失敗：HTTP ${res.status}`
       console.error(msg)
-      ElMessage.error('下载失败，报告可能尚未生成')
+      ElMessage.error('下載失敗，報告可能尚未生成')
       return
     }
     const blob = await res.blob()
@@ -424,10 +424,10 @@ const downloadReport = async (analysis: AnalysisTask) => {
     a.click()
     window.URL.revokeObjectURL(url)
     document.body.removeChild(a)
-    ElMessage.success('报告已开始下载')
+    ElMessage.success('報告已開始下載')
   } catch (err) {
-    console.error('下载报告出错:', err)
-    ElMessage.error('下载失败，请稍后重试')
+    console.error('下載報告出錯:', err)
+    ElMessage.error('下載失敗，請稍後重試')
   }
 }
 
@@ -435,7 +435,7 @@ const openNewsUrl = (url?: string) => {
   if (url) {
     window.open(url, '_blank')
   } else {
-    ElMessage.info('该新闻暂无详情链接')
+    ElMessage.info('該新聞暫無詳情連結')
   }
 }
 
@@ -454,10 +454,10 @@ const getStatusType = (status: string | AnalysisStatus): 'success' | 'info' | 'w
 const getStatusText = (status: string | AnalysisStatus) => {
   const statusMap: Record<string, string> = {
     pending: '等待中',
-    processing: '处理中',
-    running: '处理中',
+    processing: '處理中',
+    running: '處理中',
     completed: '已完成',
-    failed: '失败',
+    failed: '失敗',
     cancelled: '已取消'
   }
   return statusMap[status] || String(status)
@@ -497,7 +497,7 @@ const loadFavoriteStocks = async () => {
       }))
     }
   } catch (error) {
-    console.error('加载自选股失败:', error)
+    console.error('載入自選股失敗:', error)
   }
 }
 
@@ -519,7 +519,7 @@ const loadRecentAnalyses = async () => {
     userStats.value.totalAnalyses = body.total ?? tasks.length
     userStats.value.successfulAnalyses = tasks.filter((item: any) => item.status === 'completed').length
   } catch (error) {
-    console.error('加载最近分析失败:', error)
+    console.error('載入最近分析失敗:', error)
     recentAnalyses.value = []
   }
 }
@@ -531,7 +531,7 @@ const loadMarketNews = async () => {
 
     // 如果最近 24 小时没有新闻，则获取最新的 10 条（不限时间）
     if (response.success && response.data && response.data.news.length === 0) {
-      console.log('最近 24 小时没有新闻，获取最新的 10 条新闻（不限时间）')
+      console.log('最近 24 小時沒有新聞，取得最新的 10 則新聞（不限時間）')
       response = await newsApi.getLatestNews(undefined, 10, 24 * 365) // 回溯 1 年
     }
 
@@ -545,7 +545,7 @@ const loadMarketNews = async () => {
       }))
     }
   } catch (error) {
-    console.error('加载市场快讯失败:', error)
+    console.error('載入市場快訊失敗:', error)
     // 如果加载失败，显示提示信息
     marketNews.value = []
   }
@@ -559,7 +559,7 @@ const loadPaperAccount = async () => {
       paperAccount.value = response.data.account
     }
   } catch (error) {
-    console.error('加载模拟交易账户失败:', error)
+    console.error('載入模擬交易帳戶失敗:', error)
     paperAccount.value = null
   }
 }
@@ -584,25 +584,25 @@ const getPnlClass = (pnl: number) => {
 const syncMarketNews = async () => {
   try {
     syncingNews.value = true
-    ElMessage.info('正在同步市场新闻，请稍候...')
+    ElMessage.info('正在同步市場新聞，請稍候...')
 
     // 调用同步API（后台任务）
     const response = await newsApi.syncMarketNews(24, 50)
 
     if (response.success) {
-      ElMessage.success('新闻同步任务已启动，请稍后刷新查看')
+      ElMessage.success('新聞同步任務已啟動，請稍後刷新查看')
 
       // 等待3秒后自动刷新新闻列表
       setTimeout(async () => {
         await loadMarketNews()
         if (marketNews.value.length > 0) {
-          ElMessage.success(`成功加载 ${marketNews.value.length} 条市场新闻`)
+          ElMessage.success(`成功載入 ${marketNews.value.length} 則市場新聞`)
         }
       }, 3000)
     }
   } catch (error) {
-    console.error('同步市场快讯失败:', error)
-    ElMessage.error('同步市场新闻失败，请稍后重试')
+    console.error('同步市場快訊失敗:', error)
+    ElMessage.error('同步市場新聞失敗，請稍後重試')
   } finally {
     syncingNews.value = false
   }
