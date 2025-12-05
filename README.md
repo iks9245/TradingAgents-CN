@@ -264,3 +264,5 @@
 [⭐ Star this repo](https://github.com/hsliuping/TradingAgents-CN) | [🍴 Fork this repo](https://github.com/hsliuping/TradingAgents-CN/fork) | [📖 Read the docs](./docs/)
 
 </div>
+
+此專案為 <你的GitHub帳號> Fork 並進行個人學習改造
