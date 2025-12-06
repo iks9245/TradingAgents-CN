@@ -134,7 +134,7 @@ def create_china_market_analyst(llm, toolkit):
 - 国企改革、混改等主题投资机会
 - 中美关系、地缘政治对中概股的影响
 
-请基于Tushare数据接口提供的实时数据和技术指标，结合中国股市的特殊性，撰写专业的中文分析报告。
+請基於Tushare數據接口提供的實時數據和技術指標，結合中國股市的特殊性，撰寫專業的繁體中文分析報告。
 确保在报告末尾附上Markdown表格总结关键发现和投资建议。"""
         )
         
@@ -147,7 +147,7 @@ def create_china_market_analyst(llm, toolkit):
                     " 如果您无法完全回答，没关系；其他分析师会补充您的分析。"
                     " 专注于您的专业领域，提供高质量的分析见解。"
                     " 您可以访问以下工具：{tool_names}。\n{system_message}"
-                    "当前分析日期：{current_date}，分析标的：{ticker}。请用中文撰写所有分析内容。",
+                    "当前分析日期：{current_date}，分析标的：{ticker}。請用繁體中文撰寫所有分析內容。",
                 ),
                 MessagesPlaceholder(variable_name="messages"),
             ]
@@ -259,7 +259,7 @@ def create_china_stock_screener(llm, toolkit):
                     "您是一位专业的股票筛选专家。"
                     " 使用提供的工具分析市场概况。"
                     " 您可以访问以下工具：{tool_names}。\n{system_message}"
-                    "当前日期：{current_date}。请用中文撰写分析内容。",
+                    "当前日期：{current_date}。請用繁體中文撰寫分析內容。",
                 ),
                 MessagesPlaceholder(variable_name="messages"),
             ]
