@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 
 """
-Google模型工具调用统一处理器
+Google模型工具調用統一處理器
 
-解决Google模型在工具调用时result.content为空的问题，
-提供统一的工具调用处理逻辑供所有分析师使用。
+解決Google模型在工具調用時result.content為空的問題，
+提供統一的工具調用處理邏輯供所有分析師使用。
 """
 
 import logging
@@ -15,11 +15,11 @@ from langchain_core.messages import HumanMessage, ToolMessage, AIMessage
 logger = logging.getLogger(__name__)
 
 class GoogleToolCallHandler:
-    """Google模型工具调用统一处理器"""
+    """Google模型工具調用統一處理器"""
     
     @staticmethod
     def is_google_model(llm) -> bool:
-        """检查是否为Google模型"""
+        """檢查是否為Google模型"""
         return 'Google' in llm.__class__.__name__ or 'ChatGoogleOpenAI' in llm.__class__.__name__
     
     @staticmethod
@@ -29,21 +29,21 @@ class GoogleToolCallHandler:
         tools: List[Any],
         state: Dict[str, Any],
         analysis_prompt_template: str,
-        analyst_name: str = "分析师"
+        analyst_name: str = "分析師"
     ) -> Tuple[str, List[Any]]:
         """
-        统一处理Google模型的工具调用
-        
+        統一處理Google模型的工具調用
+
         Args:
-            result: LLM的第一次调用结果
-            llm: 语言模型实例
+            result: LLM的第一次調用結果
+            llm: 語言模型實例
             tools: 可用工具列表
-            state: 当前状态
-            analysis_prompt_template: 分析提示词模板
-            analyst_name: 分析师名称
-            
+            state: 當前狀態
+            analysis_prompt_template: 分析提示詞模板
+            analyst_name: 分析師名稱
+
         Returns:
-            Tuple[str, List[Any]]: (分析报告, 消息列表)
+            Tuple[str, List[Any]]: (分析報告, 消息列表)
         """
         
         # 验证输入参数
@@ -534,24 +534,24 @@ class GoogleToolCallHandler:
                 # 构建分析提示 - 根据尝试次数调整
                 if attempt == 0:
                     analysis_prompt = f"""
-                    基于以上工具调用的结果，请为{analyst_name}生成一份详细的分析报告。
-                    
+                    基於以上工具調用的結果，請為{analyst_name}生成一份詳細的分析報告。
+
                     要求：
-                    1. 综合分析所有工具返回的数据
-                    2. 提供清晰的投资建议和风险评估
-                    3. 报告应该结构化且易于理解
-                    4. 包含具体的数据支撑和分析逻辑
-                    
-                    请生成完整的分析报告：
+                    1. 綜合分析所有工具返回的數據
+                    2. 提供清晰的投資建議和風險評估
+                    3. 報告應該結構化且易於理解
+                    4. 包含具體的數據支撐和分析邏輯
+
+                    請生成完整的分析報告：
                     """
                 elif attempt == 1:
                     analysis_prompt = f"""
-                    请简要分析{analyst_name}的工具调用结果并提供投资建议。
-                    要求：简洁明了，包含关键数据和建议。
+                    請簡要分析{analyst_name}的工具調用結果並提供投資建議。
+                    要求：簡潔明瞭，包含關鍵數據和建議。
                     """
                 else:
                     analysis_prompt = f"""
-                    请为{analyst_name}提供一个简短的分析总结。
+                    請為{analyst_name}提供一個簡短的分析總結。
                     """
                 
                 logger.debug(f"🔍 [{analyst_name}] 分析提示预览: {analysis_prompt[:100]}...")
@@ -699,14 +699,14 @@ class GoogleToolCallHandler:
             if isinstance(msg, ToolMessage) and hasattr(msg, 'content'):
                 content = str(msg.content)
                 if len(content) > 1000:
-                    content = content[:1000] + "\n\n[注：数据已截断]"
+                    content = content[:1000] + "\n\n[註：數據已截斷]"
                 tool_results.append(content)
-        
+
         if tool_results:
             tool_summary = "\n\n".join([f"工具结果 {i+1}:\n{result}" for i, result in enumerate(tool_results)])
-            report = f"{analyst_name}工具调用完成，获得以下数据：\n\n{tool_summary}\n\n注：由于模型响应异常，此为基于工具数据的简化报告。"
+            report = f"{analyst_name}工具調用完成，獲得以下數據：\n\n{tool_summary}\n\n註：由於模型響應異常，此為基於工具數據的簡化報告。"
         else:
-            report = f"{analyst_name}分析完成，但未能获取到有效的工具数据。建议检查数据源或重新尝试分析。"
+            report = f"{analyst_name}分析完成，但未能獲取到有效的工具數據。建議檢查數據源或重新嘗試分析。"
         
         return report
     
@@ -718,34 +718,34 @@ class GoogleToolCallHandler:
         specific_requirements: str = ""
     ) -> str:
         """
-        创建标准的分析提示词
-        
-        Args:
-            ticker: 股票代码
-            company_name: 公司名称
-            analyst_type: 分析师类型（如"技术分析"、"基本面分析"等）
-            specific_requirements: 特定要求
-            
-        Returns:
-            str: 分析提示词
-        """
-        
-        base_prompt = f"""现在请基于上述工具获取的数据，生成详细的{analyst_type}报告。
+        創建標準的分析提示詞
 
-**股票信息：**
-- 公司名称：{company_name}
-- 股票代码：{ticker}
+        Args:
+            ticker: 股票代碼
+            company_name: 公司名稱
+            analyst_type: 分析師類型（如"技術分析"、"基本面分析"等）
+            specific_requirements: 特定要求
+
+        Returns:
+            str: 分析提示詞
+        """
+
+        base_prompt = f"""現在請基於上述工具獲取的數據，生成詳細的{analyst_type}報告。
+
+**股票資訊：**
+- 公司名稱：{company_name}
+- 股票代碼：{ticker}
 
 **分析要求：**
-1. 报告必须基于工具返回的真实数据进行分析
-2. 包含具体的数值和专业分析
-3. 提供明确的投资建议和风险提示
-4. 报告长度不少于800字
-5. 使用中文撰写
-6. 确保在分析中正确使用公司名称"{company_name}"和股票代码"{ticker}"
+1. 報告必須基於工具返回的真實數據進行分析
+2. 包含具體的數值和專業分析
+3. 提供明確的投資建議和風險提示
+4. 報告長度不少於800字
+5. 使用中文撰寫
+6. 確保在分析中正確使用公司名稱"{company_name}"和股票代碼"{ticker}"
 
 {specific_requirements}
 
-请生成专业、详细的{analyst_type}报告。"""
-        
+請生成專業、詳細的{analyst_type}報告。"""
+
         return base_prompt
