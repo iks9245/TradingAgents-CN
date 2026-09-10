@@ -213,7 +213,12 @@ def get_config():
 
 def set_config(config):
     """设置配置（兼容性包装）"""
-    config_manager.save_settings(config)
+    # Graph credentials are runtime-only, not general settings. Keep the caller's
+    # config intact for LLM construction without copying its keys to disk.
+    config_manager.save_settings({
+        key: value for key, value in config.items()
+        if not key.lower().endswith("api_key")
+    })
 
 
 def get_finnhub_news(

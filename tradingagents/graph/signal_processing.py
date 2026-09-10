@@ -8,6 +8,27 @@ from tradingagents.utils.tool_logging import log_graph_module
 logger = get_logger("graph.signal_processing")
 
 
+# Normalize only parser vocabulary; preserve the original report and API values.
+_PARSER_TRANSLATION = str.maketrans(
+    "買賣購標價當現漲長議預終決資風險", "买卖购标价当现涨长议预终决资风险"
+)
+
+
+def _parser_text(text: str) -> str:
+    return text.translate(_PARSER_TRANSLATION)
+
+
+def _normalize_action(action) -> str:
+    if not isinstance(action, str):
+        return "持有"
+    return {
+        "买入": "买入", "持有": "持有", "卖出": "卖出",
+        "buy": "买入", "hold": "持有", "sell": "卖出",
+        "购买": "买入", "保持": "持有", "出售": "卖出",
+        "purchase": "买入", "keep": "持有", "dispose": "卖出",
+    }.get(_parser_text(action.strip()).lower(), "持有")
+
+
 class SignalProcessor:
     """Processes trading signals to extract actionable decisions."""
 
@@ -123,25 +144,14 @@ class SignalProcessor:
                 decision_data = json.loads(json_text)
 
                 # 验证和标准化数据
-                action = decision_data.get('action', '持有')
-                if action not in ['买入', '持有', '卖出']:
-                    # 尝试映射英文和其他变体
-                    action_map = {
-                        'buy': '买入', 'hold': '持有', 'sell': '卖出',
-                        'BUY': '买入', 'HOLD': '持有', 'SELL': '卖出',
-                        '购买': '买入', '保持': '持有', '出售': '卖出',
-                        'purchase': '买入', 'keep': '持有', 'dispose': '卖出'
-                    }
-                    action = action_map.get(action, '持有')
-                    if action != decision_data.get('action', '持有'):
-                        logger.debug(f"🔍 [SignalProcessor] 投资建议映射: {decision_data.get('action')} -> {action}")
+                action = _normalize_action(decision_data.get('action'))
 
                 # 处理目标价格，确保正确提取
                 target_price = decision_data.get('target_price')
                 if target_price is None or target_price == "null" or target_price == "":
                     # 如果JSON中没有目标价格，尝试从reasoning和完整文本中提取
                     reasoning = decision_data.get('reasoning', '')
-                    full_text = f"{reasoning} {full_signal}"  # 扩大搜索范围
+                    full_text = _parser_text(f"{reasoning} {full_signal}")
                     
                     # 增强的价格匹配模式
                     price_patterns = [
@@ -216,6 +226,7 @@ class SignalProcessor:
     def _smart_price_estimation(self, text: str, action: str, is_china: bool) -> float:
         """智能价格推算方法"""
         import re
+        text = _parser_text(text)
         
         # 尝试从文本中提取当前价格和涨跌幅信息
         current_price = None
@@ -282,14 +293,19 @@ class SignalProcessor:
         """简单的决策提取方法作为备用"""
         import re
 
-        # 提取动作
-        action = '持有'  # 默认
-        if re.search(r'买入|BUY', text, re.IGNORECASE):
-            action = '买入'
-        elif re.search(r'卖出|SELL', text, re.IGNORECASE):
-            action = '卖出'
-        elif re.search(r'持有|HOLD', text, re.IGNORECASE):
-            action = '持有'
+        text = _parser_text(text)
+        # Prefer the final recommendation over actions mentioned in the debate.
+        action_pattern = r'买入|卖出|持有|\bBUY\b|\bSELL\b|\bHOLD\b'
+        final_lines = re.findall(
+            r'(?:最终交易建议|最终建议|最终决策)\s*[*：:\s]*(.+)',
+            text, re.IGNORECASE,
+        )
+        action_text = final_lines[-1] if final_lines else text
+        actions = {
+            _normalize_action(match.group())
+            for match in re.finditer(action_pattern, action_text, re.IGNORECASE)
+        }
+        action = actions.pop() if len(actions) == 1 else '持有'
 
         # 尝试提取目标价格（使用增强的模式）
         target_price = None

@@ -743,6 +743,7 @@ import { stocksApi } from '@/api/stocks'
 import { useAppStore } from '@/stores/app'
 import { useAuthStore } from '@/stores/auth'
 import { configApi } from '@/api/config'
+import { formatLocalDate } from '@/utils/datetime'
 import { ANALYSTS, convertAnalystNamesToIds } from '@/constants/analysts'
 import { marked } from 'marked'
 import { recommendModels, validateModels, type ModelRecommendationResponse } from '@/api/modelCapabilities'
@@ -973,7 +974,7 @@ const submitAnalysis = async () => {
       stock_code: analysisForm.symbol,  // 兼容字段
       parameters: {
         market_type: analysisForm.market,
-        analysis_date: analysisDate.toISOString().split('T')[0],
+        analysis_date: formatLocalDate(analysisDate),
         research_depth: getDepthDescription(analysisForm.researchDepth),
         selected_analysts: convertAnalystNamesToIds(analysisForm.selectedAnalysts),
         include_sentiment: analysisForm.includeSentiment,

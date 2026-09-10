@@ -65,7 +65,7 @@ def create_research_manager(llm, memory):
 辯論歷史：
 {history}
 
-請用中文撰寫所有分析內容和建議。"""
+請用繁體中文撰寫所有分析內容和建議。"""
 
         # 📊 统计 prompt 大小
         prompt_length = len(prompt)
