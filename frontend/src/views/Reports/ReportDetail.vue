@@ -263,6 +263,7 @@ import { ref, onMounted, computed, h, reactive } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox, ElInput, ElInputNumber, ElForm, ElFormItem } from 'element-plus'
 import { paperApi } from '@/api/paper'
+import { parseTradingRecommendation } from '@/utils/tradingRecommendation'
 import { stocksApi } from '@/api/stocks'
 import { configApi, type LLMConfig } from '@/api/config'
 import {
@@ -433,9 +434,7 @@ const getFileExtension = (format: string): string => {
 // 判断是否可以应用到交易
 const canApplyToTrading = computed(() => {
   if (!report.value) return false
-  const rec = report.value.recommendation || ''
-  // 检查是否包含买入或卖出建议
-  return rec.includes('买入') || rec.includes('卖出') || rec.toLowerCase().includes('buy') || rec.toLowerCase().includes('sell')
+  return parseTradingRecommendation(report.value.recommendation || '') !== null
 })
 
 // 解析投资建议
@@ -445,27 +444,11 @@ const parseRecommendation = () => {
   const rec = report.value.recommendation || ''
   const traderPlan = report.value.reports?.trader_investment_plan || ''
 
-  // 解析操作类型
-  let action: 'buy' | 'sell' | null = null
-  if (rec.includes('买入') || rec.toLowerCase().includes('buy')) {
-    action = 'buy'
-  } else if (rec.includes('卖出') || rec.toLowerCase().includes('sell')) {
-    action = 'sell'
-  }
-
-  if (!action) return null
-
-  // 解析目标价格（从recommendation或trader_investment_plan中提取）
-  let targetPrice: number | null = null
-  const priceMatch = rec.match(/目标价[格]?[：:]\s*([0-9.]+)/) ||
-                     traderPlan.match(/目标价[格]?[：:]\s*([0-9.]+)/)
-  if (priceMatch) {
-    targetPrice = parseFloat(priceMatch[1])
-  }
+  const parsed = parseTradingRecommendation(rec, traderPlan)
+  if (!parsed) return null
 
   return {
-    action,
-    targetPrice,
+    ...parsed,
     confidence: report.value.confidence_score || 0,
     riskLevel: report.value.risk_level || '中等'
   }
@@ -501,6 +484,8 @@ const getCashByCurrency = (account: any, stockSymbol: string): number => {
 
 // 应用到模拟交易
 const applyToTrading = async () => {
+  const stockSymbol = (report.value as { stock_symbol: string } | null)?.stock_symbol
+  if (!stockSymbol) return
   const recommendation = parseRecommendation()
   if (!recommendation) {
     ElMessage.warning('无法解析投资建议，请检查报告内容')
@@ -522,15 +507,23 @@ const applyToTrading = async () => {
     const currentPosition = positions.find(p => p.code === report.value.stock_symbol)
 
     // 获取当前实时价格
-    let currentPrice = 10 // 默认价格
+    let currentPrice = 0
     try {
       const quoteRes = await stocksApi.getQuote(report.value.stock_symbol)
       if (quoteRes.success && quoteRes.data && quoteRes.data.price) {
         currentPrice = quoteRes.data.price
       }
     } catch (error) {
-      console.warn('获取实时价格失败，使用默认价格')
+      console.warn('获取实时价格失败')
     }
+    if (!Number.isFinite(currentPrice) || currentPrice <= 0) {
+      ElMessage.error('無法取得行情，請稍後重試；不使用虛構價格下單')
+      return
+    }
+
+    const market = getMarketByStockCode(stockSymbol)
+    const lotSize = market === '美股' ? 1 : 100
+    const currency = market === '美股' ? 'USD' : market === '港股' ? 'HKD' : 'CNY'
 
     // 获取对应货币的可用资金
     const availableCash = getCashByCurrency(account, report.value.stock_symbol)
@@ -541,10 +534,8 @@ const applyToTrading = async () => {
 
     if (recommendation.action === 'buy') {
       // 买入：根据可用资金和当前价格计算
-      maxQuantity = Math.floor(availableCash / currentPrice / 100) * 100 // 100股为单位
-      const suggested = Math.floor(maxQuantity * 0.2) // 建议使用20%资金
-      suggestedQuantity = Math.floor(suggested / 100) * 100 // 向下取整到100的倍数
-      suggestedQuantity = Math.max(100, suggestedQuantity) // 至少100股
+      maxQuantity = Math.floor(availableCash / currentPrice / lotSize) * lotSize
+      suggestedQuantity = Math.max(lotSize, Math.floor(maxQuantity * 0.2 / lotSize) * lotSize)
     } else {
       // 卖出：根据当前持仓计算
       if (!currentPosition || currentPosition.quantity === 0) {
@@ -552,8 +543,11 @@ const applyToTrading = async () => {
         return
       }
       maxQuantity = currentPosition.quantity
-      suggestedQuantity = Math.floor(maxQuantity / 100) * 100 // 向下取整到100的倍数
-      suggestedQuantity = Math.max(100, suggestedQuantity) // 至少100股
+      suggestedQuantity = Math.floor(maxQuantity / lotSize) * lotSize
+    }
+    if (maxQuantity < lotSize || suggestedQuantity < lotSize) {
+      ElMessage.warning('可用資金或持倉不足')
+      return
     }
 
     // 用户可修改的价格和数量（使用reactive）
@@ -600,47 +594,37 @@ const applyToTrading = async () => {
           ]),
           recommendation.targetPrice ? h('p', [
             h('strong', '目标价格：'),
-            h('span', { style: 'color: #E6A23C;' }, `${recommendation.targetPrice.toFixed(2)}元`),
+            h('span', { style: 'color: #E6A23C;' }, `${recommendation.targetPrice.toFixed(2)} ${currency}`),
             h('span', { style: 'color: #909399; font-size: 12px; margin-left: 8px;' }, '(仅供参考)')
           ]) : null,
           h('p', [
             h('strong', '当前价格：'),
-            h('span', `${currentPrice.toFixed(2)}元`)
+            h('span', `${currentPrice.toFixed(2)} ${currency}`)
           ]),
           h('div', { style: 'margin: 16px 0;' }, [
             h('p', { style: 'margin-bottom: 8px;' }, [
-              h('strong', '交易价格：'),
-              h('span', { style: 'color: #909399; font-size: 12px; margin-left: 8px;' }, '(可修改)')
-            ]),
-            h(ElInputNumber, {
-              modelValue: tradeForm.price,
-              'onUpdate:modelValue': (val: number) => { tradeForm.price = val },
-              min: 0.01,
-              max: 9999,
-              precision: 2,
-              step: 0.01,
-              style: 'width: 200px;',
-              controls: true
-            })
+              h('strong', '市價模擬單：'),
+              h('span', { style: 'color: #909399; font-size: 12px;' }, '成交價以下單時行情為準，並非歷史報告價格或限價單')
+            ])
           ]),
           h('div', { style: 'margin: 16px 0;' }, [
             h('p', { style: 'margin-bottom: 8px;' }, [
               h('strong', '交易数量：'),
-              h('span', { style: 'color: #909399; font-size: 12px; margin-left: 8px;' }, '(可修改，100股为单位)')
+              h('span', { style: 'color: #909399; font-size: 12px; margin-left: 8px;' }, `(可修改，${lotSize}股為單位)`)
             ]),
             h(ElInputNumber, {
               modelValue: tradeForm.quantity,
               'onUpdate:modelValue': (val: number) => { tradeForm.quantity = val },
-              min: 100,
+              min: lotSize,
               max: maxQuantity,
-              step: 100,
+              step: lotSize,
               style: 'width: 200px;',
               controls: true
             })
           ]),
           h('p', [
             h('strong', '预计金额：'),
-            h('span', { style: 'color: #409EFF; font-weight: bold;' }, `${estimatedAmount.value}元`)
+            h('span', { style: 'color: #409EFF; font-weight: bold;' }, `${estimatedAmount.value} ${currency}`)
           ]),
           h('p', [
             h('strong', '模型置信度：'),
@@ -653,7 +637,7 @@ const applyToTrading = async () => {
             h('span', { style: 'color: #909399; font-size: 12px; margin-left: 8px;' }, '(实际风险可能更高)')
           ]),
           recommendation.action === 'buy' ? h('p', { style: 'color: #909399; font-size: 12px; margin-top: 12px;' },
-            `可用资金：${availableCash.toFixed(2)}元，最大可买：${maxQuantity}股`
+            `可用資金：${availableCash.toFixed(2)} ${currency}，最大可買：${maxQuantity}股`
           ) : null,
           recommendation.action === 'sell' ? h('p', { style: 'color: #909399; font-size: 12px; margin-top: 12px;' },
             `当前持仓：${maxQuantity}股`
@@ -667,12 +651,13 @@ const applyToTrading = async () => {
       message: h(MessageComponent),
       confirmButtonText: '确认下单',
       cancelButtonText: '取消',
+      showCancelButton: true,
       type: 'warning',
       beforeClose: (action, instance, done) => {
         if (action === 'confirm') {
           // 验证输入
-          if (tradeForm.quantity < 100 || tradeForm.quantity % 100 !== 0) {
-            ElMessage.error('交易数量必须是100的整数倍')
+          if (!Number.isFinite(tradeForm.quantity) || tradeForm.quantity < lotSize || tradeForm.quantity % lotSize !== 0) {
+            ElMessage.error(`交易數量必須是${lotSize}的整數倍`)
             return
           }
           if (tradeForm.quantity > maxQuantity) {
@@ -687,7 +672,7 @@ const applyToTrading = async () => {
           // 检查资金是否充足
           if (recommendation.action === 'buy') {
             const totalAmount = tradeForm.price * tradeForm.quantity
-            if (totalAmount > account.cash) {
+            if (totalAmount > availableCash) {
               ElMessage.error('可用资金不足')
               return
             }
@@ -716,7 +701,7 @@ const applyToTrading = async () => {
     }
 
   } catch (error: any) {
-    if (error !== 'cancel') {
+    if (error !== 'cancel' && error !== 'close') {
       console.error('应用到交易失败:', error)
       ElMessage.error(error.message || '操作失败')
     }

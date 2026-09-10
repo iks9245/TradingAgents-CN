@@ -235,15 +235,15 @@
               <div class="account-section-title">🇨🇳 A股帳戶</div>
               <div class="account-item">
                 <div class="account-label">現金</div>
-                <div class="account-value">¥{{ formatMoney(paperAccount.cash?.CNY || paperAccount.cash) }}</div>
+                <div class="account-value">¥{{ formatMoney(paperAccount.cash?.CNY ?? paperAccount.cash) }}</div>
               </div>
               <div class="account-item">
                 <div class="account-label">持倉市值</div>
-                <div class="account-value">¥{{ formatMoney(paperAccount.positions_value?.CNY || paperAccount.positions_value) }}</div>
+                <div class="account-value">¥{{ formatMoney(paperAccount.positions_value?.CNY ?? paperAccount.positions_value) }}</div>
               </div>
               <div class="account-item">
                 <div class="account-label">總資產</div>
-                <div class="account-value primary">¥{{ formatMoney(paperAccount.equity?.CNY || paperAccount.equity) }}</div>
+                <div class="account-value primary">¥{{ formatMoney(paperAccount.equity?.CNY ?? paperAccount.equity) }}</div>
               </div>
             </div>
 

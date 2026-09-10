@@ -168,7 +168,12 @@ def get_provider_and_url_by_model_sync(model_name: str) -> dict:
                     return {
                         "provider": provider,
                         "backend_url": backend_url,
-                        "api_key": api_key
+                        "api_key": api_key,
+                        "model_config": {
+                            key: config_dict[key]
+                            for key in ("max_tokens", "temperature", "timeout", "retry_times")
+                            if config_dict.get(key) is not None
+                        },
                     }
 
         client.close()
@@ -656,6 +661,12 @@ class SimpleAnalysisService:
         # 命中缓存
         if code in self._stock_name_cache:
             return self._stock_name_cache[code]
+        # The legacy helper below only supports A-shares. Passing AAPL/0700.HK
+        # into it can block the request on unrelated Chinese data providers.
+        from tradingagents.utils.stock_utils import StockUtils
+        if not StockUtils.get_market_info(code)["is_china"]:
+            self._stock_name_cache[code] = code
+            return code
         name = None
         try:
             if _get_stock_info_safe:
@@ -1239,7 +1250,9 @@ class SimpleAnalysisService:
                 quick_model=quick_model,
                 deep_model=deep_model,
                 llm_provider=quick_provider,  # 主要使用快速模型的供应商
-                market_type=market_type  # 使用前端传递的市场类型
+                market_type=market_type,  # 使用前端传递的市场类型
+                quick_model_config=quick_provider_info.get("model_config"),
+                deep_model_config=deep_provider_info.get("model_config"),
             )
 
             # 🔧 添加混合模式配置
@@ -2581,6 +2594,11 @@ class SimpleAnalysisService:
                 logger.warning(f"⚠️ 获取股票名称失败: {stock_symbol} - {e}")
                 stock_name = stock_symbol
 
+            # Preserve the requested research date; created_at records execution time.
+            report_date = result.get("analysis_date") or timestamp.strftime('%Y-%m-%d')
+            if isinstance(report_date, datetime):
+                report_date = report_date.strftime('%Y-%m-%d')
+
             # 构建文档（与web目录的MongoDBReportManager保持一致）
             document = {
                 "analysis_id": analysis_id,
@@ -2588,7 +2606,7 @@ class SimpleAnalysisService:
                 "stock_name": stock_name,  # 🔥 添加股票名称字段
                 "market_type": market_type,  # 🔥 添加市场类型字段
                 "model_info": result.get("model_info", "Unknown"),  # 🔥 添加模型信息字段
-                "analysis_date": timestamp.strftime('%Y-%m-%d'),
+                "analysis_date": report_date,
                 "timestamp": timestamp,
                 "status": "completed",
                 "source": "api",

@@ -53,8 +53,8 @@ def create_risk_manager(llm, memory):
 
 ---
 
-專注於可操作的見解和持續改進。建立在過去經驗教訓的基礎上，批判性地評估所有觀點，確保每個決策都能帶來更好的結果。請用中文撰寫所有
-分析內容和建議。
+專注於可操作的見解和持續改進。建立在過去經驗教訓的基礎上，批判性地評估所有觀點，確保每個決策都能帶來更好的結果。請用繁體中文撰寫所有
+分析內容和建議。"""
 
         # 📊 统计 prompt 大小
         prompt_length = len(prompt)
@@ -141,7 +141,7 @@ def create_risk_manager(llm, memory):
 - 設置合理的止損和止盈位
 - 等待更好的入場或出場時機
 
-注意：此為系統默認建議，建議結合人工分析做出最終決策。
+注意：此為系統默認建議，建議結合人工分析做出最終決策。"""
 
         new_risk_debate_state = {
             "judge_decision": response_content,

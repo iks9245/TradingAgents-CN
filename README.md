@@ -20,6 +20,8 @@
 
 ## 🎉 v1.0.0-preview 版本上線 - 全新架構升級
 
+本 fork 的繁體預覽版修復、CI 範圍與本機驗收方式，請見 [繁體預覽版開發與驗收指南](docs/development/traditional-preview.md)。
+
 > 🚀 **重磅發布**: v1.0.0-preview 版本現已正式！全新的 FastAPI + Vue 3 架構，帶來企業級的性能和體驗！
 
 ### ✨ 核心特性

@@ -16,6 +16,11 @@
  * @param options - 格式化选项
  * @returns 格式化后的时间字符串
  */
+export function formatLocalDate(date: Date): string {
+  if (Number.isNaN(date.getTime())) throw new Error('無效的分析日期')
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+}
+
 export function formatDateTime(
   dateStr: string | number | null | undefined,
   options?: Intl.DateTimeFormatOptions

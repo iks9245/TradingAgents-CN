@@ -1,0 +1,74 @@
+name: Traditional Chinese preview
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      mongodb:
+        image: mongo:7
+        ports: ['27017:27017']
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.adminCommand({ping:1}).ok'"
+          --health-interval 10s --health-timeout 5s --health-retries 12
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s --health-timeout 5s --health-retries 12
+    env:
+      PREVIEW_INTEGRATION: '1'
+      MONGODB_HOST: 127.0.0.1
+      MONGODB_DATABASE: tradingagents_preview_ci
+      REDIS_HOST: 127.0.0.1
+      REDIS_ENABLED: 'true'
+      JWT_SECRET: preview-ci-only-not-a-production-secret
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Check Python syntax before installing dependencies
+        run: python scripts/validation/check_python_syntax.py
+      - uses: astral-sh/setup-uv@v6
+      - name: Install constrained dependencies
+        run: uv pip install --system -r pyproject.toml -c requirements-lock.txt pytest pytest-asyncio
+      - name: Verify production imports
+        run: python -c "from tradingagents.graph.trading_graph import TradingAgentsGraph; from app.main import app"
+      - name: Agent regressions and API journey (offline LLM)
+        run: python -m pytest -q tests/preview --junitxml=preview-results.xml
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: preview-backend-results
+          path: preview-results.xml
+
+  frontend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install locked frontend dependencies
+        run: npx --yes yarn@1.22.22 install --frozen-lockfile --production=false --registry https://registry.npmjs.org
+      - name: Build production frontend and generated declarations
+        run: npx vite build
+      - name: Reject new strict type errors (existing debt recorded explicitly)
+        run: node scripts/check-type-regressions.mjs
+      - name: Traditional Chinese report-to-order parsing
+        run: node --experimental-strip-types --test tests/*.test.mjs

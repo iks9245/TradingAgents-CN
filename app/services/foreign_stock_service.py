@@ -257,7 +257,11 @@ class ForeignStockService:
             }).sort("priority", -1).to_list(length=None)
 
             if groupings:
-                priority_list = [g["data_source_name"] for g in groupings]
+                # Legacy groupings used the library name; handlers use the provider ID.
+                priority_list = list(dict.fromkeys(
+                    "yahoo_finance" if g["data_source_name"].lower() == "yfinance"
+                    else g["data_source_name"].lower() for g in groupings
+                ))
                 logger.info(f"📊 [{market}数据源优先级] 从数据库读取: {priority_list}")
                 return priority_list
         except Exception as e:
@@ -266,8 +270,8 @@ class ForeignStockService:
         # 默认优先级
         default_priority = {
             "CN": ["tushare", "akshare", "baostock"],
-            "HK": ["yfinance", "akshare"],
-            "US": ["yfinance", "alpha_vantage", "finnhub"]
+            "HK": ["yahoo_finance", "akshare"],
+            "US": ["yahoo_finance", "alpha_vantage", "finnhub"]
         }
         priority_list = default_priority.get(market, [])
         logger.info(f"📊 [{market}数据源优先级] 使用默认: {priority_list}")
@@ -1834,4 +1838,3 @@ class ForeignStockService:
         except Exception as e:
             logger.warning(f"⚠️ AKShare获取港股新闻失败: {e}")
             raise
-
