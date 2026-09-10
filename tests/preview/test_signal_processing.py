@@ -60,4 +60,3 @@ def test_json_missing_price_extracts_traditional_label():
     llm = FakeLLM(json.dumps({"action": "買入", "target_price": None}))
     result = SignalProcessor(llm).process_signal("目標價位: 42.5\n最終交易建議: 買入", "600000")
     assert result["target_price"] == 42.5
-
